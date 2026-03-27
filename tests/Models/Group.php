@@ -6,7 +6,6 @@ use OpenCore\Orm\Annotations\{Table, Field};
 
 #[Table('uc_group')]
 final class Group {
-
   #[Field(primaryKey: true)]
   public ?int $id;
 
@@ -15,5 +14,4 @@ final class Group {
 
   #[Field('owner_id', foreignKey: User::class)]
   public ?int $ownerId;
-
 }

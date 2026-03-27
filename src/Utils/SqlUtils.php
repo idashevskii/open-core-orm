@@ -12,7 +12,6 @@ use OpenCore\Orm\Sql;
 use OpenCore\Orm\SqlTable;
 
 final class SqlUtils {
-
   public static function buildTableFactor(Sql $result, SqlTable $table) {
     $result->sql .= '`' . $table->name . '`';
     if ($result->tableAliasesEnabled) {
@@ -20,7 +19,7 @@ final class SqlUtils {
     }
   }
 
-  public static function andEqualsCondition(?SqlExpr $condition, SqlField $field, mixed $value): SqlExpr {
+  public static function andEqualsCondition(?SqlExpr $condition, SqlField $field, mixed $value, bool $negative = false): SqlExpr {
     if ($value instanceof SqlField) {
       $right = new SqlExprField($value);
     } else if ($value instanceof SqlExpr) {
@@ -28,7 +27,16 @@ final class SqlUtils {
     } else {
       $right = new SqlExprValue($value);
     }
-    $exprEq = new SqlExprOpBinary(SqlExprOpBinary::OP_EQ, new SqlExprField($field), $right);
+    $exprEq = new SqlExprOpBinary($negative ? SqlExprOpBinary::OP_NE : SqlExprOpBinary::OP_EQ, new SqlExprField($field), $right);
+    if ($condition === null) {
+      return $exprEq;
+    }
+    return new SqlExprOpBinary(SqlExprOpBinary::OP_AND, $condition, $exprEq);
+  }
+
+  public static function andLike(?SqlExpr $condition, SqlField $field, string $value): SqlExpr {
+    $value = '%'.\str_replace(['%', '_'], ['\%', '\_'], $value).'%';
+    $exprEq = new SqlExprOpBinary(SqlExprOpBinary::OP_LIKE, new SqlExprField($field), new SqlExprValue($value));
     if ($condition === null) {
       return $exprEq;
     }
@@ -46,7 +54,6 @@ final class SqlUtils {
   }
 
   public static function buildIntoJoined(Sql $result, array $astList, string $separator) {
-    self::buildIntoJoinedCb($result, $astList, $separator, fn(SqlAst $ast, Sql $result) => $ast->buildInto($result));
+    self::buildIntoJoinedCb($result, $astList, $separator, fn (SqlAst $ast, Sql $result) => $ast->buildInto($result));
   }
-
 }

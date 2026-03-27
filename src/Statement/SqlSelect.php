@@ -40,6 +40,16 @@ final class SqlSelect extends SqlBuilder {
     return $this;
   }
 
+  public function whereNotEquals(SqlField $field, mixed $value): self {
+    $this->st->whereCondition = SqlUtils::andEqualsCondition($this->st->whereCondition, $field, $value, negative: true);
+    return $this;
+  }
+
+  public function whereLike(SqlField $field, string $value): self {
+    $this->st->whereCondition = SqlUtils::andLike($this->st->whereCondition, $field, $value);
+    return $this;
+  }
+
   public function orderBy(SqlField $field, bool $reverse = false): self {
     $this->st->orderBy[] = [new SqlExprField($field), $reverse];
     return $this;

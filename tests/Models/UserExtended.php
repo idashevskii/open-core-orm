@@ -6,7 +6,6 @@ use OpenCore\Orm\Annotations\{Table, Field};
 
 #[Table('uc_user_extended')]
 class UserExtended extends User {
-
   #[Field(primaryKey: true, foreignKey: User::class)]
   public ?int $id;
 
@@ -15,5 +14,4 @@ class UserExtended extends User {
 
   #[Field('phone_number')]
   public ?string $phoneNumber;
-
 }

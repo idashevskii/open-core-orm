@@ -6,7 +6,6 @@ use OpenCore\Orm\Annotations\{Table, Field};
 
 #[Table('uc_user_base')]
 class UserBase {
-
   #[Field(primaryKey: true)]
   public ?int $id;
 
@@ -18,5 +17,4 @@ class UserBase {
 
   #[Field('last_login_time', externalTable: self::class)]
   public ?int $lastLoginTime;
-
 }

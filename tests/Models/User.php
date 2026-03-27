@@ -5,8 +5,7 @@ namespace OpenCore\Tests\Models;
 use OpenCore\Orm\Annotations\{Table, Field};
 
 #[Table('uc_user')]
-class User extends UserBase{
-
+class User extends UserBase {
   #[Field(primaryKey: true)]
   public ?int $id;
 
@@ -18,5 +17,4 @@ class User extends UserBase{
 
   #[Field('group_id', externalTable: self::class, foreignKey: Group::class)]
   public ?int $groupId;
-
 }

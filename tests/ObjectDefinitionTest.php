@@ -11,7 +11,6 @@ use OpenCore\Orm\SqlTable;
 use OpenCore\Orm\SqlField;
 
 final class ObjectDefinitionTest extends TestCase {
-
   public function testPrimaryKey() {
     $def = ObjectDefinition::from(User::class);
 
@@ -66,7 +65,5 @@ final class ObjectDefinitionTest extends TestCase {
       'uc_user' => ['groupId', 'id', 'nickname', 'signupTime'],
       'uc_user_extended' => ['email', 'id', 'phoneNumber'],
     ], $res);
-
   }
-
 }
