@@ -19,28 +19,37 @@ final class SqlUtils {
     }
   }
 
-  public static function andEqualsCondition(?SqlExpr $condition, SqlField $field, mixed $value, bool $negative = false): SqlExpr {
+  public static function valueToAst(mixed $value) {
     if ($value instanceof SqlField) {
-      $right = new SqlExprField($value);
+      return new SqlExprField($value);
     } else if ($value instanceof SqlExpr) {
-      $right = $value;
+      return $value;
     } else {
-      $right = new SqlExprValue($value);
+      return new SqlExprValue($value);
     }
-    $exprEq = new SqlExprOpBinary($negative ? SqlExprOpBinary::OP_NE : SqlExprOpBinary::OP_EQ, new SqlExprField($field), $right);
-    if ($condition === null) {
-      return $exprEq;
-    }
-    return new SqlExprOpBinary(SqlExprOpBinary::OP_AND, $condition, $exprEq);
   }
 
-  public static function andLike(?SqlExpr $condition, SqlField $field, string $value): SqlExpr {
-    $value = '%'.\str_replace(['%', '_'], ['\%', '\_'], $value).'%';
-    $exprEq = new SqlExprOpBinary(SqlExprOpBinary::OP_LIKE, new SqlExprField($field), new SqlExprValue($value));
-    if ($condition === null) {
-      return $exprEq;
+  public static function valueToLikeAst(string $value) {
+    return new SqlExprValue('%'.\str_replace(['%', '_'], ['\%', '\_'], $value).'%');
+  }
+
+  public static function fieldBinaryOp(string $op, SqlField $field, mixed $value) {
+    return new SqlExprOpBinary($op, new SqlExprField($field), self::valueToAst($value));
+  }
+
+  public static function chainBinaryExpr(string $chainOp, ?SqlExpr $chainingExpr, SqlExpr $addingExpr): SqlExpr {
+    if ($chainingExpr === null) {
+      return $addingExpr;
     }
-    return new SqlExprOpBinary(SqlExprOpBinary::OP_AND, $condition, $exprEq);
+    return new SqlExprOpBinary($chainOp, $chainingExpr, $addingExpr);
+  }
+
+  public static function andEqualsCondition(?SqlExpr $condition, SqlField $field, mixed $value): SqlExpr {
+    return self::chainBinaryExpr(
+      SqlExprOpBinary::OP_AND,
+      $condition,
+      self::fieldBinaryOp(SqlExprOpBinary::OP_EQ, $field, $value),
+    );
   }
 
   public static function buildIntoJoinedCb(Sql $result, array $list, string $separator, callable $cb) {

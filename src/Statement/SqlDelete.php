@@ -10,20 +10,20 @@ use OpenCore\Orm\Sql;
 
 final class SqlDelete extends SqlBuilder {
 
-  private readonly SqlDeleteStatement $st;
+  private readonly SqlDeleteStatement $ast;
 
   public function __construct(SqlTable $table) {
-    $this->st = new SqlDeleteStatement($table);
+    $this->ast = new SqlDeleteStatement($table);
   }
 
   public function whereEquals(SqlField $field, mixed $value): self {
-    $this->st->whereCondition = SqlUtils::andEqualsCondition($this->st->whereCondition, $field, $value);
+    $this->ast->whereCondition = SqlUtils::andEqualsCondition($this->ast->whereCondition, $field, $value);
     return $this;
   }
 
   public function build(): Sql {
     $ret = new Sql();
-    $this->st->buildInto($ret);
+    $this->ast->buildInto($ret);
     return $ret;
   }
 

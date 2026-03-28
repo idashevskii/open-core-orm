@@ -109,6 +109,7 @@ final class SqlTest extends TestCase {
     $cacheField = new SqlField($table, 'cache', 'myCache');
     $viewsField = new SqlField($table, 'views');
     $descrField = new SqlField($table, 'descr');
+    $textField = new SqlField($table, 'text');
 
     $ext1Id = new SqlField($tableExt1, 'id');
     $ext1TabId = new SqlField($tableExt1, 'tab_id');
@@ -126,8 +127,21 @@ final class SqlTest extends TestCase {
       ->whereEquals($idField, [1, 2, 3])
       ->whereEquals($updField, 1024)
       ->whereEquals($viewsField, null)
-      ->whereNotEquals($descrField, null)
-      ->whereLike($descrField, 'hello%_world')
+      ->where(Sql::expr()->notEquals($descrField, null))
+      ->where(Sql::expr()->like($descrField, 'hello%_world'))
+      ->where(
+        Sql::or()
+          ->like($textField, 'like1')
+          ->like($textField, 'like2')
+          ->notEquals($textField, 'ne1')
+          ->expr(
+            Sql::and()
+              ->equals($textField, 'val1')
+              ->notEquals($descrField, 'val2')
+              ->expr(Sql::or()->equals($textField, 'val3'))
+              ->expr(Sql::and()->equals($textField, 'val4')),
+          ),
+      )
       ->build();
 
     $this->assertEquals(
@@ -136,12 +150,25 @@ final class SqlTest extends TestCase {
       . ' FROM `tab` AS `t1`'
       . ' INNER JOIN `extension1` AS `e2` ON `e2`.`tab_id` = `t1`.`id`'
       . ' INNER JOIN `extension2` AS `e3` ON `e3`.`ext_id` = `e2`.`id`'
-      . ' WHERE `t1`.`id` IN (?, ?, ?) AND `t1`.`updated` = ?'
-      . ' AND `t1`.`views` IS NULL AND `t1`.`descr` IS NOT NULL AND `t1`.`descr` LIKE ?'
+      . ' WHERE `t1`.`id` IN (?, ?, ?) AND `t1`.`updated` = ? AND `t1`.`views` IS NULL'
+        .' AND `t1`.`descr` IS NOT NULL AND `t1`.`descr` LIKE ?'
+        . ' AND ('
+          .'`t1`.`text` LIKE ?'
+          .' OR `t1`.`text` LIKE ?'
+          .' OR `t1`.`text` != ?'
+          .' OR'
+            .' `t1`.`text` = ?'
+            .' AND `t1`.`descr` != ?'
+            .' AND `t1`.`text` = ?'
+            .' AND `t1`.`text` = ?'
+        .')'
       . ' ORDER BY `t1`.`id` DESC, `e3`.`ext_id` ASC',
       $res->sql,
     );
-    $this->assertEquals([1, 2, 3, 1024, '%hello\%\_world%'], $res->params);
+    $this->assertEquals([
+      1, 2, 3, 1024, '%hello\%\_world%', '%like1%', '%like2%',
+      'ne1', 'val1', 'val2', 'val3', 'val4',
+    ], $res->params);
   }
 
   public function testDelete() {

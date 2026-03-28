@@ -12,25 +12,25 @@ use OpenCore\Orm\Sql;
 
 final class SqlUpdate extends SqlBuilder {
 
-  private readonly SqlUpdateStatement $st;
+  private readonly SqlUpdateStatement $ast;
 
   public function __construct(SqlTable $table) {
-    $this->st = new SqlUpdateStatement($table);
+    $this->ast = new SqlUpdateStatement($table);
   }
 
   public function set(SqlField $field, mixed $value): self {
-    $this->st->assignments[] = [new SqlExprField($field), new SqlExprValue($value)];
+    $this->ast->assignments[] = [new SqlExprField($field), new SqlExprValue($value)];
     return $this;
   }
 
   public function whereEquals(SqlField $field, mixed $value): self {
-    $this->st->whereCondition = SqlUtils::andEqualsCondition($this->st->whereCondition, $field, $value);
+    $this->ast->whereCondition = SqlUtils::andEqualsCondition($this->ast->whereCondition, $field, $value);
     return $this;
   }
 
   public function build(): Sql {
     $ret = new Sql();
-    $this->st->buildInto($ret);
+    $this->ast->buildInto($ret);
     return $ret;
   }
 

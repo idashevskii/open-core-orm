@@ -2,88 +2,86 @@
 
 namespace OpenCore\Orm\Statement;
 
-use OpenCore\Orm\Ast\SqlSelectStatement;
-use OpenCore\Orm\Ast\SqlExprField;
-use OpenCore\Orm\Ast\SqlSelectExpr;
-use OpenCore\Orm\Sql;
-use OpenCore\Orm\SqlTable;
-use OpenCore\Orm\SqlField;
-use OpenCore\Orm\Utils\SqlUtils;
 use OpenCore\Orm\Ast\SqlAst;
+use OpenCore\Orm\Ast\SqlExprField;
+use OpenCore\Orm\Ast\SqlExprOpBinary;
 use OpenCore\Orm\Ast\SqlJoinSpec;
+use OpenCore\Orm\Ast\SqlSelectExpr;
+use OpenCore\Orm\Ast\SqlSelectStatement;
+use OpenCore\Orm\AstBuilder\SqlBinaryOp;
+use OpenCore\Orm\AstBuilder\SqlCall;
+use OpenCore\Orm\AstBuilder\SqlJoin;
+use OpenCore\Orm\Sql;
+use OpenCore\Orm\SqlField;
+use OpenCore\Orm\SqlTable;
+use OpenCore\Orm\Utils\SqlUtils;
 
 final class SqlSelect extends SqlBuilder {
-
-  private readonly SqlSelectStatement $st;
+  private readonly SqlSelectStatement $ast;
 
   public function __construct() {
-    $this->st = new SqlSelectStatement();
+    $this->ast = new SqlSelectStatement();
   }
 
   public function limit(int $limit, int $offset): self {
-    $this->st->limit = [$limit, $offset];
+    $this->ast->limit = [$limit, $offset];
     return $this;
   }
 
   public function from(SqlTable $table): self {
-    $this->st->fromTable = $table;
+    $this->ast->fromTable = $table;
     return $this;
   }
 
   public function join(SqlJoin $join): self {
-    $this->st->joins[] = $join->st;
+    $this->ast->joins[] = $join->ast;
+    return $this;
+  }
+
+  public function where(SqlBinaryOp $condition): self {
+    $this->ast->whereCondition = SqlUtils::chainBinaryExpr(SqlExprOpBinary::OP_AND, $this->ast->whereCondition, $condition->ast);
     return $this;
   }
 
   public function whereEquals(SqlField $field, mixed $value): self {
-    $this->st->whereCondition = SqlUtils::andEqualsCondition($this->st->whereCondition, $field, $value);
-    return $this;
-  }
-
-  public function whereNotEquals(SqlField $field, mixed $value): self {
-    $this->st->whereCondition = SqlUtils::andEqualsCondition($this->st->whereCondition, $field, $value, negative: true);
-    return $this;
-  }
-
-  public function whereLike(SqlField $field, string $value): self {
-    $this->st->whereCondition = SqlUtils::andLike($this->st->whereCondition, $field, $value);
+    $this->ast->whereCondition = SqlUtils::andEqualsCondition($this->ast->whereCondition, $field, $value);
     return $this;
   }
 
   public function orderBy(SqlField $field, bool $reverse = false): self {
-    $this->st->orderBy[] = [new SqlExprField($field), $reverse];
+    $this->ast->orderBy[] = [new SqlExprField($field), $reverse];
     return $this;
   }
 
   public function groupBy(SqlField $field): self {
-    $this->st->groupBy[] = new SqlExprField($field);
+    $this->ast->groupBy[] = new SqlExprField($field);
     return $this;
   }
 
   public function selectCall(SqlCall $expr, string $alias = null): self {
-    $this->st->selectExprs[] = new SqlSelectExpr($expr->st, $alias);
+    $this->ast->selectExprs[] = new SqlSelectExpr($expr->ast, $alias);
     return $this;
   }
 
   public function fields(array $fields): self {
     foreach ($fields as $field) {
-      $this->st->selectExprs[] = new SqlSelectExpr(new SqlExprField($field), $field->alias);
+      $this->ast->selectExprs[] = new SqlSelectExpr(new SqlExprField($field), $field->alias);
     }
     return $this;
   }
 
   public function calcFoundRows(): self {
-    $this->st->calcFoundRows = true;
+    $this->ast->calcFoundRows = true;
     return $this;
   }
 
   public function build(): Sql {
     $requiredTables = [];
     $selectedTables = [];
-    $this->st->traverse(function (SqlAst $ast) use (&$requiredTables, &$selectedTables) {
+    $this->ast->traverse(function (SqlAst $ast) use (&$requiredTables, &$selectedTables) {
       if ($ast instanceof SqlExprField) {
         $table = $ast->field->table;
-        if (!isset ($requiredTables[$table->id])) {
+        if (!isset($requiredTables[$table->id])) {
           $requiredTables[$table->id] = $table;
         }
       } else if ($ast instanceof SqlJoinSpec) {
@@ -96,25 +94,24 @@ final class SqlSelect extends SqlBuilder {
     });
 
     foreach ($requiredTables as $tabId => $reqTab) {
-      if (isset ($selectedTables[$tabId])) {
+      if (isset($selectedTables[$tabId])) {
         continue;
       }
-      if ($this->st->fromTable === null) {
-        $this->st->fromTable = $reqTab;
+      if ($this->ast->fromTable === null) {
+        $this->ast->fromTable = $reqTab;
       } else {
         // push natural joins to beginning because other joins can reference to their fields and will fail
-        if ($this->st->joins === null) {
-          $this->st->joins = [];
+        if ($this->ast->joins === null) {
+          $this->ast->joins = [];
         }
-        array_unshift($this->st->joins, Sql::naturalJoin($reqTab)->st);
+        array_unshift($this->ast->joins, Sql::naturalJoin($reqTab)->ast);
       }
     }
     $ret = new Sql();
     if (count($requiredTables) > 1) {
       $ret->tableAliasesEnabled = true;
     }
-    $this->st->buildInto($ret);
+    $this->ast->buildInto($ret);
     return $ret;
   }
-
 }
