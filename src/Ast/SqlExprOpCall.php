@@ -5,15 +5,12 @@ namespace OpenCore\Orm\Ast;
 use OpenCore\Orm\Sql;
 use OpenCore\Orm\Utils\SqlUtils;
 
-
 class SqlExprOpCall extends SqlExpr {
-
   public ?array $args = null;
 
   public function __construct(
     public readonly string $fn,
-  ) {
-  }
+  ) {}
 
   public function buildInto(Sql $result) {
     $result->sql .= $this->fn . '(';
@@ -31,5 +28,4 @@ class SqlExprOpCall extends SqlExpr {
       }
     }
   }
-
 }

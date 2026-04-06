@@ -9,7 +9,6 @@ use OpenCore\Orm\Utils\SqlUtils;
 use OpenCore\Orm\Sql;
 
 final class SqlDelete extends SqlBuilder {
-
   private readonly SqlDeleteStatement $ast;
 
   public function __construct(SqlTable $table) {
@@ -26,5 +25,4 @@ final class SqlDelete extends SqlBuilder {
     $this->ast->buildInto($ret);
     return $ret;
   }
-
 }

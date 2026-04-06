@@ -29,8 +29,8 @@ final class SqlBinaryOp {
   public function expr(SqlBinaryOp $expr): self {
     return $this->chain($expr->ast);
   }
-  
-  private function chain(SqlExpr $addingExpr){
+
+  private function chain(SqlExpr $addingExpr) {
     $this->ast = SqlUtils::chainBinaryExpr(
       $this->op,
       $this->ast,

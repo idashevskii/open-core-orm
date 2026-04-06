@@ -24,9 +24,11 @@ final class ObjectDefinitionTest extends TestCase {
   public function testForeignKey() {
     $def = ObjectDefinition::from(User::class);
 
+    $foreProps = $def->getForeignProps();
     $foreClass = $def->getForeignClass('groupId');
     $foreProp = $def->getForeignProp(Group::class);
 
+    $this->assertEquals(['groupId'], $foreProps);
     $this->assertEquals(Group::class, $foreClass);
     $this->assertEquals('groupId', $foreProp);
   }

@@ -5,12 +5,10 @@ namespace OpenCore\Orm\Ast;
 use OpenCore\Orm\Sql;
 
 final class SqlSelectExpr extends SqlAst {
-
   public function __construct(
     private readonly SqlExpr $expr,
     private readonly ?string $alias = null,
-  ) {
-  }
+  ) {}
 
   public function buildInto(Sql $result) {
     $expr = $this->expr;
@@ -24,5 +22,4 @@ final class SqlSelectExpr extends SqlAst {
     $cb($this);
     $this->expr->traverse($cb);
   }
-
 }

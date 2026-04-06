@@ -3,7 +3,6 @@
 namespace OpenCore\Orm;
 
 final class SqlTable {
-
   private static int $globalIds = 0;
   public readonly int $id;
 
@@ -12,5 +11,4 @@ final class SqlTable {
   ) {
     $this->id = ++self::$globalIds;
   }
-
 }

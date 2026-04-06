@@ -3,7 +3,6 @@
 namespace OpenCore\Orm;
 
 final class SqlField {
-
   public readonly string $alias;
 
   public function __construct(
@@ -13,5 +12,4 @@ final class SqlField {
   ) {
     $this->alias = $alias ?? $this->name;
   }
-
 }

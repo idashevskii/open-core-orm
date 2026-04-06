@@ -7,7 +7,6 @@ use OpenCore\Orm\SqlTable;
 use OpenCore\Orm\Utils\SqlUtils;
 
 final class SqlSelectStatement extends SqlAst {
-
   public ?SqlTable $fromTable = null;
   public ?array $joins = null;
   public ?array $selectExprs = null;
@@ -84,5 +83,4 @@ final class SqlSelectStatement extends SqlAst {
       }
     }
   }
-
 }

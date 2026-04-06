@@ -7,18 +7,16 @@ use OpenCore\Orm\SqlTable;
 use OpenCore\Orm\Utils\SqlUtils;
 
 final class SqlJoinSpec extends SqlAst {
-
-  const JOIN_INNER = 1;
-  const JOIN_OUTER = 2;
-  const JOIN_NATURAL = 3;
+  public const JOIN_INNER = 1;
+  public const JOIN_OUTER = 2;
+  public const JOIN_NATURAL = 3;
 
   public ?SqlExpr $onCondition = null;
 
   public function __construct(
     private readonly int $type,
     public readonly SqlTable $table,
-  ) {
-  }
+  ) {}
 
   public function buildInto(Sql $result) {
     $result->sql .= match ($this->type) {
@@ -40,5 +38,4 @@ final class SqlJoinSpec extends SqlAst {
       $this->onCondition->traverse($cb);
     }
   }
-
 }

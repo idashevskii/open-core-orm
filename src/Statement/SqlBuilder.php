@@ -5,7 +5,6 @@ namespace OpenCore\Orm\Statement;
 use OpenCore\Orm\Sql;
 
 abstract class SqlBuilder {
-
   public function pipe(callable|array $cb): static {
     if (is_array($cb)) {
       $ret = $this;

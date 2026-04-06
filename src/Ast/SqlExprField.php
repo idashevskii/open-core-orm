@@ -6,11 +6,9 @@ use OpenCore\Orm\Sql;
 use OpenCore\Orm\SqlField;
 
 final class SqlExprField extends SqlExpr {
-
   public function __construct(
     public readonly SqlField $field,
-  ) {
-  }
+  ) {}
 
   public function buildInto(Sql $result) {
     if ($result->tableAliasesEnabled) {
@@ -22,5 +20,4 @@ final class SqlExprField extends SqlExpr {
   public function traverse(callable $cb) {
     $cb($this);
   }
-
 }

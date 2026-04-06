@@ -5,7 +5,6 @@ namespace OpenCore\Orm;
 use OpenCore\Orm\Annotations\{Field, Table};
 
 final class ObjectDefinition {
-
   private static array $cache = [];
   private ?array $foreignToProp = null;
   private ?SqlTable $sqlTable = null;
@@ -40,7 +39,7 @@ final class ObjectDefinition {
     $rClass = new \ReflectionClass($class);
     $clsAttrs = $rClass->getAttributes(Table::class);
     if (!$clsAttrs) {
-      throw new \ErrorException("Class $class has not " . Table::class . " annotation");
+      throw new \ErrorException("Class $class has not " . Table::class . ' annotation');
     }
     $tableArgs = $clsAttrs[0]->getArguments();
     $sqlTableName = $tableArgs[0] ?? $tableArgs['name'];
@@ -92,7 +91,7 @@ final class ObjectDefinition {
 
   /**
    * Returns all definitions, taking in account all external fields in order where first comes repos with less count of dependenicies.
-   * 
+   *
    * It could be helpful for such operations as create/delete, where order matter
    * @return static[]
    */
@@ -106,8 +105,8 @@ final class ObjectDefinition {
             $externals[$class] = [$extDef, count($extDef->getRequiredDefinitions())];
           }
         }
-        usort($externals, fn(array $od1, array $od2) => $od1[1] - $od2[1]); // sort by count of deps
-        $this->reqDefs = array_map(fn(array $od) => $od[0], $externals);
+        usort($externals, fn (array $od1, array $od2) => $od1[1] - $od2[1]); // sort by count of deps
+        $this->reqDefs = array_map(fn (array $od) => $od[0], $externals);
         $this->reqDefs[] = $this;
       } else {
         $this->reqDefs = [$this];
@@ -126,11 +125,15 @@ final class ObjectDefinition {
 
   /** Non external props only */
   public function getOwnProperties(): array {
-    return array_values(array_filter($this->props, fn(string $prop) => !isset ($this->propToExternalMap[$prop])));
+    return array_values(array_filter($this->props, fn (string $prop) => !isset($this->propToExternalMap[$prop])));
   }
 
-  public function getSqlFields(array $propNames = null): array {
-    return array_map(fn(string $prop) => $this->getSqlField($prop), $propNames ?? $this->props);
+  public function getSqlFields(?array $propNames = null): array {
+    return array_map(fn (string $prop) => $this->getSqlField($prop), $propNames ?? $this->props);
+  }
+
+  public function getForeignProps(?array $propNames = null): array {
+    return \array_keys($this->propToForeignMap);
   }
 
   public function getForeignClass(string $prop): string {
@@ -143,5 +146,4 @@ final class ObjectDefinition {
     }
     return $this->foreignToProp[$foreignClass];
   }
-
 }

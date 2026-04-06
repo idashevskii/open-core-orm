@@ -7,14 +7,12 @@ use OpenCore\Orm\SqlTable;
 use OpenCore\Orm\Utils\SqlUtils;
 
 final class SqlInsertStatement extends SqlAst {
-
   public array $fields = [];
   public array $values = [];
 
   public function __construct(
     public readonly SqlTable $fromTable,
-  ) {
-  }
+  ) {}
 
   public function buildInto(Sql $result) {
     $result->sql .= 'INSERT INTO ';
@@ -29,5 +27,4 @@ final class SqlInsertStatement extends SqlAst {
       $result->sql .= ')';
     });
   }
-
 }

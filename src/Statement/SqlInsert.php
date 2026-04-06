@@ -10,7 +10,6 @@ use OpenCore\Orm\Sql;
 use OpenCore\Orm\Ast\SqlExprValue;
 
 final class SqlInsert extends SqlBuilder {
-
   private readonly SqlInsertStatement $ast;
 
   public function __construct(SqlTable $table) {
@@ -18,12 +17,12 @@ final class SqlInsert extends SqlBuilder {
   }
 
   public function fields(array $fields): self {
-    $this->ast->fields = array_map(fn(SqlField $field) => new SqlExprField($field), $fields);
+    $this->ast->fields = array_map(fn (SqlField $field) => new SqlExprField($field), $fields);
     return $this;
   }
 
   public function values(array $values): self {
-    $this->ast->values[] = array_map(fn(mixed $value) => new SqlExprValue($value), $values);
+    $this->ast->values[] = array_map(fn (mixed $value) => new SqlExprValue($value), $values);
     return $this;
   }
 
@@ -32,5 +31,4 @@ final class SqlInsert extends SqlBuilder {
     $this->ast->buildInto($ret);
     return $ret;
   }
-
 }

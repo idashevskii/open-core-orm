@@ -8,7 +8,6 @@ use OpenCore\Orm\Ast\SqlJoinSpec;
 use OpenCore\Orm\Utils\SqlUtils;
 
 final class SqlJoin {
-
   public readonly SqlJoinSpec $ast;
 
   public function __construct(int $type, SqlTable $table) {
@@ -19,5 +18,4 @@ final class SqlJoin {
     $this->ast->onCondition = SqlUtils::andEqualsCondition($this->ast->onCondition, $field, $value);
     return $this;
   }
-
 }

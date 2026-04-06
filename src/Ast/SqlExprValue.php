@@ -5,10 +5,9 @@ namespace OpenCore\Orm\Ast;
 use OpenCore\Orm\Sql;
 
 final class SqlExprValue extends SqlExpr {
-
-  const TYPE_NULL = 1;
-  const TYPE_SCALAR = 2;
-  const TYPE_ARRAY = 3;
+  public const TYPE_NULL = 1;
+  public const TYPE_SCALAR = 2;
+  public const TYPE_ARRAY = 3;
 
   public readonly int $type;
 
@@ -41,5 +40,4 @@ final class SqlExprValue extends SqlExpr {
   public function traverse(callable $cb) {
     $cb($this);
   }
-
 }

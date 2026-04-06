@@ -11,7 +11,6 @@ use OpenCore\Orm\Utils\SqlUtils;
 use OpenCore\Orm\Sql;
 
 final class SqlUpdate extends SqlBuilder {
-
   private readonly SqlUpdateStatement $ast;
 
   public function __construct(SqlTable $table) {
@@ -33,5 +32,4 @@ final class SqlUpdate extends SqlBuilder {
     $this->ast->buildInto($ret);
     return $ret;
   }
-
 }

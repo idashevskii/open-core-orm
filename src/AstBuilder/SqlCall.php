@@ -7,7 +7,6 @@ use OpenCore\Orm\Ast\SqlExprOpCall;
 use OpenCore\Orm\Ast\SqlExprField;
 
 final class SqlCall {
-
   public readonly SqlExprOpCall $ast;
 
   public function __construct(string $fn) {
@@ -18,5 +17,4 @@ final class SqlCall {
     $this->ast->args[] = new SqlExprField($field);
     return $this;
   }
-
 }

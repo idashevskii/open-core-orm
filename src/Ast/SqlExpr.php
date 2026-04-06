@@ -2,6 +2,4 @@
 
 namespace OpenCore\Orm\Ast;
 
-abstract class SqlExpr extends SqlAst {
-
-}
+abstract class SqlExpr extends SqlAst {}
