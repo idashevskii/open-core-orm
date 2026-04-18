@@ -6,10 +6,9 @@ use OpenCore\Orm\Sql;
 use OpenCore\Orm\Utils\SqlUtils;
 
 class SqlExprOpCall extends SqlExpr {
-  public ?array $args = null;
-
   public function __construct(
     public readonly string $fn,
+    public ?array $args = null,
   ) {}
 
   public function buildInto(Sql $result) {

@@ -132,7 +132,7 @@ final class SqlTest extends TestCase {
       ->where(
         Sql::or()
           ->like($textField, 'like1')
-          ->like($textField, 'like2')
+          ->like($textField, 'LiKe2', caseInsensitive: true)
           ->notEquals($textField, 'ne1')
           ->expr(
             Sql::and()
@@ -154,7 +154,7 @@ final class SqlTest extends TestCase {
         .' AND `t1`.`descr` IS NOT NULL AND `t1`.`descr` LIKE ?'
         . ' AND ('
           .'`t1`.`text` LIKE ?'
-          .' OR `t1`.`text` LIKE ?'
+          .' OR LOWER(`t1`.`text`) LIKE ?'
           .' OR `t1`.`text` != ?'
           .' OR'
             .' `t1`.`text` = ?'

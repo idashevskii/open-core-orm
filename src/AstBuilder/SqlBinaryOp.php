@@ -3,7 +3,9 @@
 namespace OpenCore\Orm\AstBuilder;
 
 use OpenCore\Orm\Ast\SqlExpr;
+use OpenCore\Orm\Ast\SqlExprField;
 use OpenCore\Orm\Ast\SqlExprOpBinary;
+use OpenCore\Orm\Ast\SqlExprOpCall;
 use OpenCore\Orm\SqlField;
 use OpenCore\Orm\Utils\SqlUtils;
 
@@ -22,8 +24,17 @@ final class SqlBinaryOp {
     return $this->chain(SqlUtils::fieldBinaryOp(SqlExprOpBinary::OP_NE, $field, $value));
   }
 
-  public function like(SqlField $field, string $value): self {
-    return $this->chain(SqlUtils::fieldBinaryOp(SqlExprOpBinary::OP_LIKE, $field, SqlUtils::valueToLikeAst($value)));
+  public function like(SqlField $field, string $value, bool $caseInsensitive = false): self {
+    $left = new SqlExprField($field);
+    if ($caseInsensitive) {
+      $value = \mb_strtolower($value);
+      $left = new SqlExprOpCall('LOWER', [$left]);
+    }
+    return $this->chain(new SqlExprOpBinary(
+      SqlExprOpBinary::OP_LIKE,
+      $left,
+      SqlUtils::valueToLikeAst($value),
+    ));
   }
 
   public function expr(SqlBinaryOp $expr): self {
