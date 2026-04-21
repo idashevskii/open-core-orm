@@ -36,10 +36,6 @@ class Sql {
     return new SqlUpdate($table);
   }
 
-  public static function innerJoin(SqlTable $table): SqlJoin {
-    return new SqlJoin(SqlJoinSpec::JOIN_INNER, $table);
-  }
-
   public static function count(SqlField $field): SqlCall {
     return self::call('COUNT')->withFieldArg($field);
   }
@@ -61,7 +57,19 @@ class Sql {
   }
 
   public static function naturalJoin(SqlTable $table): SqlJoin {
-    return new SqlJoin(SqlJoinSpec::JOIN_NATURAL, $table);
+    return self::join(SqlJoinSpec::JOIN_NATURAL, $table);
+  }
+
+  public static function innerJoin(SqlTable $table): SqlJoin {
+    return self::join(SqlJoinSpec::JOIN_INNER, $table);
+  }
+
+  public static function leftJoin(SqlTable $table): SqlJoin {
+    return self::join(SqlJoinSpec::JOIN_LEFT, $table);
+  }
+
+  public static function join(int $joinType, SqlTable $table): SqlJoin {
+    return new SqlJoin($joinType, $table);
   }
 
   public function getTableAlias(SqlTable $table) {

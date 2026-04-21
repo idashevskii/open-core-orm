@@ -23,11 +23,15 @@ final class ObjectDefinition {
     $this->props = array_keys($propToFieldMap);
   }
 
-  public static function from(string $class): self {
-    if (!isset(self::$cache[$class])) {
-      self::$cache[$class] = self::buildFromClass($class);
+  public static function from(string $class, ?string $alias = null): self {
+    $key = $class;
+    if ($alias !== null) {
+      $key .= '/'.$alias;
     }
-    return self::$cache[$class];
+    if (!isset(self::$cache[$key])) {
+      self::$cache[$key] = self::buildFromClass($class);
+    }
+    return self::$cache[$key];
   }
 
   private static function buildFromClass(string $class): static {

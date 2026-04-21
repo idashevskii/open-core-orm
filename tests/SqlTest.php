@@ -9,24 +9,54 @@ use OpenCore\Orm\SqlField;
 
 final class SqlTest extends TestCase {
   public function testNoAliases() {
-    $tab1 = new SqlTable('tab1');
+    $tab = new SqlTable('tab');
 
-    $tab1Id = new SqlField($tab1, 'id', 'myId1');
-    $tab1Prop = new SqlField($tab1, 'prop1');
+    $tabId = new SqlField($tab, 'id', 'myId');
+    $tabProp1 = new SqlField($tab, 'prop1');
 
     $res = Sql::select()
-      ->fields([$tab1Id, $tab1Prop])
-      ->whereEquals($tab1Id, 1)
-      ->whereEquals($tab1Prop, 2)
+      ->fields([$tabId, $tabProp1])
+      ->whereEquals($tabId, 1)
+      ->whereEquals($tabProp1, 2)
       ->build();
 
     $this->assertEquals(
-      'SELECT `id` AS `myId1`, `prop1`'
-      . ' FROM `tab1`'
+      'SELECT `id` AS `myId`, `prop1`'
+      . ' FROM `tab`'
       . ' WHERE `id` = ? AND `prop1` = ?',
       $res->sql,
     );
     $this->assertEquals([1, 2], $res->params);
+  }
+
+  public function testSelfReferenceSelect() {
+    $define = function () {
+      $tab = new SqlTable('tab');
+      $tabId = new SqlField($tab, 'id', 'myId');
+      $tabProp = new SqlField($tab, 'prop');
+      $tabPropParent = new SqlField($tab, 'parent_id', 'myParent');
+      return [$tab, $tabId, $tabProp, $tabPropParent];
+    };
+
+    list($tab, $tabId, $tabProp, $tabPropParent) = $define();
+    list($tab2, $tabId2, $tabProp2, $tabPropParent2) = $define();
+
+    $res = Sql::select()
+      ->fields([$tabId, $tabProp, $tabPropParent])
+      ->join(Sql::leftJoin($tab2)->whereEquals($tabId2, $tabPropParent))
+      ->whereEquals($tabId, 1)
+      ->whereEquals($tabProp, 2)
+      ->whereEquals($tabProp2, 3)
+      ->build();
+
+    $this->assertEquals(
+      'SELECT `t1`.`id` AS `myId`, `t1`.`prop`, `t1`.`parent_id` AS `myParent`'
+      . ' FROM `tab` AS `t1`'
+      . ' LEFT JOIN `tab` AS `t2` ON `t2`.`id` = `t1`.`parent_id`'
+      . ' WHERE `t1`.`id` = ? AND `t1`.`prop` = ? AND `t2`.`prop` = ?',
+      $res->sql,
+    );
+    $this->assertEquals([1, 2, 3], $res->params);
   }
 
   public function testCount() {

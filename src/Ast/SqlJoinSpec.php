@@ -10,6 +10,8 @@ final class SqlJoinSpec extends SqlAst {
   public const JOIN_INNER = 1;
   public const JOIN_OUTER = 2;
   public const JOIN_NATURAL = 3;
+  public const JOIN_LEFT = 4;
+  public const JOIN_RGIHT = 5;
 
   public ?SqlExpr $onCondition = null;
 
@@ -23,6 +25,8 @@ final class SqlJoinSpec extends SqlAst {
       self::JOIN_INNER => 'INNER',
       self::JOIN_OUTER => 'OUTER',
       self::JOIN_NATURAL => 'NATURAL INNER',
+      self::JOIN_LEFT => 'LEFT',
+      self::JOIN_RIGHT => 'RIGHT',
     };
     $result->sql .= ' JOIN ';
     SqlUtils::buildTableFactor($result, $this->table);
